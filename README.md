@@ -39,3 +39,6 @@ int main(void)
 All uint8_t return values have similar meaning.
 If the function is successful, it returns 0. Else ,it returns 1.
 
+## FMPI2C
+When using Fast Mode Plus I2C (FMPI2C) instead of the regular I2C (e.g., in the
+STM32F4 series), make sure to enable `#define QMC_FMPI2C` in *QMC5883.h*.

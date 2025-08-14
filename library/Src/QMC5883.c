@@ -7,8 +7,13 @@
 #include"QMC5883.h"
 #include "math.h"
 
+#ifdef QMC_FMPI2C
+#define HAL_I2C_Mem_Write HAL_FMPI2C_Mem_Write
+#define HAL_I2C_Mem_Read  HAL_FMPI2C_Mem_Read
+#endif
+
 //###############################################################################################################
-uint8_t QMC_init(QMC_t *qmc,I2C_HandleTypeDef *i2c,uint8_t Output_Data_Rate)
+uint8_t QMC_init(QMC_t *qmc, QMC_HandleTypeDef *i2c, uint8_t Output_Data_Rate)
 {
 	uint8_t array[2];
 	qmc->i2c=i2c;
@@ -30,32 +35,32 @@ uint8_t QMC_init(QMC_t *qmc,I2C_HandleTypeDef *i2c,uint8_t Output_Data_Rate)
 
 uint8_t QMC_read(QMC_t *qmc)
 {
-	  qmc->datas[0]=0;
-	  HAL_I2C_Mem_Read(qmc->i2c, 0x1A, 0x06, 1, qmc->datas, 1, 100);
+	qmc->datas[0]=0;
+	HAL_I2C_Mem_Read(qmc->i2c, 0x1A, 0x06, 1, qmc->datas, 1, 100);
 
-	  if((qmc->datas[0]&0x01)==1)
-	  {
-		  HAL_I2C_Mem_Read(qmc->i2c, 0x1A, 0x00, 1, qmc->datas, 6, 100);
-		  qmc->Xaxis= (qmc->datas[1]<<8) | qmc->datas[0];
-		  qmc->Yaxis= (qmc->datas[3]<<8) | qmc->datas[2];
-		  qmc->Zaxis= (qmc->datas[5]<<8) | qmc->datas[4];
+	if((qmc->datas[0]&0x01)==1)
+	{
+		HAL_I2C_Mem_Read(qmc->i2c, 0x1A, 0x00, 1, qmc->datas, 6, 100);
+		qmc->Xaxis= (qmc->datas[1]<<8) | qmc->datas[0];
+		qmc->Yaxis= (qmc->datas[3]<<8) | qmc->datas[2];
+		qmc->Zaxis= (qmc->datas[5]<<8) | qmc->datas[4];
 
-		  qmc->compas=atan2f(qmc->Yaxis,qmc->Xaxis)*180.00/M_PI;
+		qmc->compas=atan2f(qmc->Yaxis,qmc->Xaxis)*((float)(180.00/M_PI));
 
-		  if(qmc->compas>0)
-		  {
-			  qmc->heading= qmc->compas;
-		  }
-		  else
-		  {
-			  qmc->heading=360+qmc->compas;
-		  }
-	  }
-	  else
-	  {
-		  return 1;
-	  }
-return 0;
+		if(qmc->compas>0)
+		{
+			qmc->heading= qmc->compas;
+		}
+		else
+		{
+			qmc->heading=360+qmc->compas;
+		}
+	}
+	else
+	{
+		return 1;
+	}
+	return 0;
 }
 
 float QMC_readHeading(QMC_t *qmc)

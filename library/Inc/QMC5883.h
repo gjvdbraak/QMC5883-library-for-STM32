@@ -19,11 +19,17 @@
 #define Continuous 1
 #define QMC_OK 0
 #define QMC_FALSE 1
+//#define QMC_FMPI2C  // enable when using Fast Mode Plus I2C (FMPI2C) instead of regular I2C
 //#########################################################################################################
+#ifdef QMC_FMPI2C
+	typedef FMPI2C_HandleTypeDef QMC_HandleTypeDef;
+#else
+	typedef I2C_HandleTypeDef QMC_HandleTypeDef;
+#endif
 
 typedef struct QMC
 {
-	I2C_HandleTypeDef   *i2c;
+	QMC_HandleTypeDef   *i2c;
 	uint8_t				Control_Register;
 	uint8_t             datas[6];
 	int16_t             Xaxis;
@@ -33,14 +39,11 @@ typedef struct QMC
 	float               compas;
 }QMC_t;
 //#########################################################################################################
-uint8_t QMC_init(QMC_t *qmc,I2C_HandleTypeDef *i2c,uint8_t Output_Data_Rate);
+uint8_t QMC_init(QMC_t *qmc,QMC_HandleTypeDef *i2c,uint8_t Output_Data_Rate);
 uint8_t QMC_read(QMC_t *qmc);
 float   QMC_readHeading(QMC_t *qmc);
 uint8_t QMC_Standby(QMC_t *qmc);
 uint8_t QMC_Reset(QMC_t *qmc);
-
-
-
 
 
 //#########################################################################################################
